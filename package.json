@@ -1,0 +1,13 @@
+{
+    "name": "TriEscape",
+    "main": "index.html",
+    "version": "1.0.0",
+    "nodejs": true,
+    "window": {
+        "title": "TriEscape",
+        "width": 1280,
+        "height": 720,
+        "toolbar": false,
+        "position": "center"
+    }
+}
