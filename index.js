@@ -1,6 +1,6 @@
 window.onload = function () {
     /*
-     TODO : Optimize : if x > 0
+     TODO : Optimize : if x > 0                                                                     - DONE
      TODO : Optimize : store in a list / remove from layer                            - DONE
      --------------------------------
      TODO : replace collision with paperjs Intersection
@@ -78,10 +78,12 @@ window.onload = function () {
     } ;
 
     var setScore = function () {
+        console.log(localStorage) ;
         for (var i=1  ; i < 5 ; i ++ ) {
-            $("button[data-level=" + i + "]").html("Level " + i + " |<span style='font-size: 9px'> Score : <span class='badge'>" + localStorage[i].split("|")[0] + " </span>| " + localStorage[i].split("|")[1] + " Attempts </span>") ;
+            $("button[data-level=" + i + "]").html("Level " + i + " |<span style='font-size: 9px'> Score : <span class='badge'>" + ( localStorage[i].split("|")[0] != "NaN" ? localStorage[i].split("|")[0] : "-"  ) + " </span>| " + ( localStorage[i].split("|")[1] != "NaN" ? localStorage[i].split("|")[1] : "-"  )  + " Attempts </span>") ;
         }
-    }() ;
+    };
+    setScore() ;
 
     setTimeout(function () {
         $spinner.css('opacity' , '0') ;
@@ -96,16 +98,13 @@ window.onload = function () {
         $(this).removeClass('btn-primary').addClass('btn-danger');
     }) ;
 
-    document.getElementById('test').onclick = function () {
-        toggleButtons()
-    } ;
-    console.log(localStorage) ;
 
 
     /* __________________________________________ GAME ________________________________________ */
     var gameLevels = {
         1 : {
-            jumpRotationOffset : 10 ,
+            bgType : 1 ,
+            jumpRotationOffset : 7.5 ,
             gameStartHeight : 300 ,
             snapPointX : 50 ,
             gameWidth : 600 ,
@@ -116,11 +115,12 @@ window.onload = function () {
             gameEndFrameDuration : 15,
             gameResumeFrameDuration :15 ,
             text : "This Will Be Easy, Have Faith In Yourself ." ,
-            map : [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,0,0,0,1,0,0,0,0, 0, 0,0,1,0,0, [0,2 ,0]  ,0,0, 0 ,0,0, 0 ,0,0, 0,0,0,0,0,0,0,0
+            map : [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,0,0,0,1,0,0,0,0, 0, 0,0,1,0,0, [0,2 ,0]  ,0,0, 0 ,0,0, 0 ,0,0, 0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0
             ]
         } ,
         2 : {
-            jumpRotationOffset : 10 ,
+            bgType : 2 ,
+            jumpRotationOffset : 7.5 ,
             gameStartHeight : 300 ,
             snapPointX : 50 ,
             gameWidth : 600 ,
@@ -130,23 +130,74 @@ window.onload = function () {
             speed : 4 ,
             gameEndFrameDuration : 15,
             gameResumeFrameDuration :15 ,
-            text : "This Will Be Easy, Have Faith In Yourself" ,
+            text : "Trust Your Instincts ." ,
             map : [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,0,0,0,1,0,0,0,0, 0, 0,0,1,0,0, 0 ,0,0, 0 ,0,0, 0 ,0,0, 0,0,0,0,0,0,0,0,
                 [0,2 ,0]  , [0,2,0]  ,[0,2 ,0]  , [0,2 ,0]  , [0,2,0]  ,[0,2 ,0]  , [0,2,0]  , [0,2,-1]  , [0,2,1]  , [0,2,-1]  , [0,2,0]  ,[0,2,0]  ,[0,2,0]  ,[0,2,0]  ,[0,2,0]
                 ,0,0,0,0, 1 ,0 ,0,0, 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
-                [0,1,0] , 1 , [0,3,0] , 1 , [0,5,0] , 1 ,
+                [0,1,0] , 1 , 1 , [0,3,0] ,[0,3,0] ,[0,3,0] ,[0,3,0] ,[0,3,1] ,[0,3,0] , [0,3,0] , [0,3,0] , 1 , [0,5,0] , [0,5,0] , [0,5,0] , 1 ,1 ,
                 0,0,0,0,0,0,0,0,0,0,0,0,
                 [0,1,0],1,1,[0,2,0],1,1,[0,3,0],1,1,[0,4,0] ,
-                0,0,0,0,0,0,0,0,10
+                0,0,0,0,0,0,1,1,1,1,1,10,0,
+            ]
+        } ,
+        3 : {
+            bgType : 3 ,
+            jumpRotationOffset : 7.5 ,
+            gameStartHeight : 300 ,
+            snapPointX : 50 ,
+            gameWidth : 600 ,
+            gameHeight : 400 ,
+            rectWidth : 25 ,
+            jumpHeight : 50,
+            speed : 4 ,
+            gameEndFrameDuration : 15,
+            gameResumeFrameDuration :15 ,
+            text : "As Days Go By , The Night is On Fire ." ,
+            map : [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,-1,-1, 0,0,1,0,0, 0 ,0,0, 0 ,0,0, -1 ,0,0, 0,0,0,0,
+                [0,2 ,0]  , [0,2,0]  ,[0,2 ,0]  , [0,2 ,0]  , [0,2,0]  ,[0,2 ,0]  , [1,2,0]  , [0,2,-1]  , [0,2,1]  , [0,2,0]  , [0,2,0]  ,[0,2,0]  ,[0,2,0]  ,[0,2,0]  ,[0,2,0],1 ,
+                [0,3,0] , [0,3,0] , [0,3,0] , [-1,3,0] , [0,3,1] , [-1,3,0] , [0,3,0] , [0,3,0] , [0,3,0] , [0, 3 , -1] , [0,3,-1] ,1,1,1,
+                [0,2 ,0]  , [0,2,0]  ,[0,2 ,0],1,1,
+                [0,3,0] , [0,3,0] , [0,3,1] ,[0,3,0] , [0,3,0] ,[0,3,0] , [0,3,0]
+                ,0,0,0,0, 1 ,0 ,0,0, 0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,
+                [0,1,0] , 1 , 1 , [0,3,0] , 1 ,1 , [0,5,0] , 1 ,
+                [0,3,0] , [0,3,0] , [0,3,-1] ,[0,3,0] , [0,3,0] ,[0,3,0] , [0,3,0] ,1,1 ,1,1 ,
+                0,0,0,0,0,0,0,0,0,0,0,0,
+                [0,1,0],1,1,[0,2,-1],1,1,[0,3,0],1,1,[0,4,0] ,0,[0,6,1] ,
+                [0,3,0] ,[0,3,0] , [0,3,0] ,1,
+                [1,5,0] ,[1,5,-1] ,[1,5,0] ,[0,5,0] ,[0,5,0] ,
+                0,0,0,0,0,0,0,0,1,0,0,-1,-1,-1,0,0,0,0
+            ]
+        },
+        4 : {
+            bgType : 3 ,
+            jumpRotationOffset : 7.5 ,
+            gameStartHeight : 300 ,
+            snapPointX : 50 ,
+            gameWidth : 600 ,
+            gameHeight : 400 ,
+            rectWidth : 25 ,
+            jumpHeight : 50,
+            speed : 4 ,
+            gameEndFrameDuration : 15,
+            gameResumeFrameDuration :15 ,
+            text : "Time Will Change Everything About This Hell" ,
+            map : [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,-1,-1, 0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0, 0 ,0,0, 0 ,0,0, -1 ,0,0, 0,0,0,0,
+            //map : [0,0,0,0,0,0,0,
+                [0,1,0] , 1 , 1 , [0,3,0] , 1 ,1 , [0,5,0] , 1 , [0,5,0],[0,5,-1],[0,5,-1],[0,5,0],[0,5,0],[0,5,0],[0,5,0],[0,5,0],
+                1, 1,[0,4,0] ,1,1,[0,5,0],[0,5,0],[0,5,0],[0,5,0],
+                1, 1,[0,3,0] ,1,1,[0,4,0],[0,4,0],[0,4,0],[0,4,1],[0,4,-1],[0,4,0],[0,4,0],[0,4,0],
+                1, 1,[0,3,0] ,1,0,[0,4,1],[0,4,1],[0,4,1],
+                0,0,0,0,-1,-1,-1,-1,1,1,-1,-1,-1,-1,1,1,0,0
             ]
         }
+
+
     } ;
     $("#start").click(function () {
         toggleMenu() ;
         var g = new game(gameLevels[$("button.btn-danger").attr('data-level') ] , function (info) {
             console.log(info) ;
             localStorage[$("button.btn-danger").attr('data-level')] = info.coins.toString() + "|" + ( Number(localStorage[$("button.btn-danger").attr('data-level')].split("|")[1]) + 1 ).toString() ;
-            console.log(localStorage) ;
             $('body').prepend('<canvas id="paper" width="600" height="400"></canvas>') ;
             canvasElem = document.getElementById('paper') ;
             canvasElem.style.left = ((window.innerWidth - 600)/2) + "px" ;

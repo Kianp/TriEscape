@@ -51,6 +51,7 @@ var game = function (gameObj , callback) {
     var previewFlag = false ;
     var isResuming = false;
     var isWon = false ;
+    var isOnCoin = false ;
 
     var jumpRotationOffset = gameObj.jumpRotationOffset;
     var jumpHeight = gameObj.jumpHeight;
@@ -82,7 +83,7 @@ var game = function (gameObj , callback) {
     box.rotation = 45;
     box.alpha = .5;
     var small = new paper.Path.Rectangle(new paper.Point(100, 100), 25, 25);
-    small.strokeColor = "#e2e2e2";
+    small.strokeColor = "#bcbcbc";
     box.rotation = -45;
     small.alpha = .5;
 
@@ -113,7 +114,7 @@ var game = function (gameObj , callback) {
     var score = new paper.PointText(new paper.Point(30 , 30)) ;
     score.content = "0"  ;
     var coins = new paper.PointText(new paper.Point(50 , 30)) ;
-    coins.fillColor = "f1c40f" ;
+    coins.fillColor = "#f1c40f" ;
     coins.content = "0" ;
 
     // path
@@ -152,12 +153,12 @@ var game = function (gameObj , callback) {
                 rectGp.addChild(rectObject);
             }
             if (mapBlock[mapBlock.length - 1] == 1) {
-                var triObject = new paper.Path.RegularPolygon(new paper.Point(( snapPointX + (rectWidth) * idx ) + (rectWidth * .5), 325 - (rectWidth) / 4 - (mapBlock.length - 1) * rectWidth), 3, rectWidth / 2);
+                var triObject = new paper.Path.RegularPolygon(new paper.Point(( snapPointX + (rectWidth) * idx ) + (rectWidth * .5), 325 - (rectWidth) / 4 - (mapBlock[mapBlock.length - 2]) * rectWidth), 3, rectWidth / 2);
                 triObject.fillColor = "#D14233";
                 triGp.addChild(triObject);
             }
             else if (mapBlock[mapBlock.length - 1] == -1) {
-                var coinObject = paper.Path.Rectangle(snapPointX + (rectWidth * idx), gameStartHeight + (rectWidth) - (mapBlock.length * rectWidth) + 10, 10, 10);
+                var coinObject = paper.Path.Rectangle(snapPointX + (rectWidth * idx), gameStartHeight + (rectWidth) - ( (mapBlock[mapBlock.length - 2] +1 ) * rectWidth) + 10, 10, 10);
                 coinObject.strokeColor = "#f1c40f";
                 coinObject.rotation = 45;
                 coinGp.addChild(coinObject);
@@ -232,8 +233,6 @@ var game = function (gameObj , callback) {
     // main loop
 
     paper.view.onFrame = function (evt) {
-        console.log(gameObj.text) ;
-        //console.log(isPlaying , isResuming , isStable , isWon);
         if (isPreview ) {
             if (!previewFlag) {
                 Text.opacity += .005;
@@ -253,6 +252,7 @@ var game = function (gameObj , callback) {
             if (isPlaying) {
                 framesPlayed += 1;
                 score.content = parseInt(framesPlayed / 10);
+                coin.content = coins ;
                 document.getElementById('score').innerHTML = framesPlayed;
                 if (key['space']) {
                     if (isStable) {
@@ -361,7 +361,7 @@ var game = function (gameObj , callback) {
                             isStable = true;
                             jumpSinDegree = 0;
                             rectAngle.rotation = 0;
-                            coins = 0;
+                            coins.content = "0" ;
                             rectGpStopPoint = rectGp.position.x;
                             triGpStopPoint = triGp.position.x;
                             coinGpStopPoint = coinGp.position.x;
@@ -379,7 +379,7 @@ var game = function (gameObj , callback) {
                             isFalling = false;
                             isStable = true;
                             jumpSinDegree = 0;
-                            coins = 0;
+                            coins.content = "0" ;
                             rectAngle.rotation = 0;
                             rectGpStopPoint = rectGp.position.x;
                             coinGpStopPoint = coinGp.position.x;
@@ -390,15 +390,25 @@ var game = function (gameObj , callback) {
                         }
                     }
                 }
-                //coim collection
+                //coin collection
+
                 for (var g = 0; g < coinGp.children.length; g++) {
                     coinGp.children[g].rotation = 45 * (Math.cos(evt.count / 10));
                     if (pointInsideRect({
                             x: ( coinGp.children[g].bounds.topRight.x) - ( cointGpInitial.x - coinGp.position.x ),
                             y: coinGp.children[g].position.y
                         })) {
-                        coins.content = Number(coins.content) + 1
-                    }
+                        coins.content = Number(coins.content) + 1 ;
+                        isOnCoin = true ;
+
+                    } ;
+                }
+                if (isOnCoin){
+                    gradientPath.fillColor.gradient.stops[0].color = "rgba(241, 196, 15, .1)" ;
+                    isOnCoin = false ;
+                }
+                else {
+                    gradientPath.fillColor.gradient.stops[0].color = "rgba(255,255,255,0)"
                 }
             }
             else if (!isWon) {
@@ -446,7 +456,7 @@ var game = function (gameObj , callback) {
                 if (framesPlayed * speed >= (map.length * 25) + 100) {
                     isPlaying = false;
                     isWon = true;
-                    var info = {coins: Number(coins.content)};
+                    var info = {score : score.content , coins: Number(coins.content)};
                     toggleMenu();
                     paper.view.attach('frame', this.onFrame);
                     paper.view.remove() ;
@@ -455,9 +465,21 @@ var game = function (gameObj , callback) {
             }
 
         }
+
         //background move
-        boxSymbol.definition.rotation += 1;
-        smallSymbol.definition.rotation -= 1;
-        gradientPath.fillColor.gradient.stops[1].rampPoint = ( Math.sin(evt.count / 20) + 9 ) / 10;
+        switch (gameObj.bgType){
+            case 1 : {
+                boxSymbol.definition.rotation += 1;
+                smallSymbol.definition.rotation -= 1;
+                gradientPath.fillColor.gradient.stops[1].rampPoint = ( Math.sin(evt.count / 50) + 9 ) / 10;
+                break
+            }
+            case 2 : {
+                boxSymbol.definition.rotation  = (Math.sin(evt.count/50)  )*180  ;
+                smallSymbol.definition.rotation = - (Math.sin(evt.count/100)  )*180;
+                gradientPath.fillColor.gradient.stops[1].rampPoint = ( Math.sin(evt.count / 50) + 9 ) / 10;
+            }
+        }
+
     };
 } ;
